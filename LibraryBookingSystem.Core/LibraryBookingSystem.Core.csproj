@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Domains\Customers\" />
+    <Folder Include="Domains\Books\" />
+    <Folder Include="Domains\Collections\" />
+    <Folder Include="Domains\Reservations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LibraryBookingSystem.Data\LibraryBookingSystem.Data.csproj" />
+  </ItemGroup>
+
+</Project>
