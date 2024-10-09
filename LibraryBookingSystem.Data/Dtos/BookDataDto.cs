@@ -2,7 +2,7 @@ using LibraryBookingSystem.Data.Enums;
 
 namespace LibraryBookingSystem.Data.Dtos
 {
-    public class BookDataDto
+    public class BookDataDto:IncludeAudit
     {
         public string BookId { get; set; }
          public string Name { get; set; }
@@ -16,5 +16,7 @@ namespace LibraryBookingSystem.Data.Dtos
         public string Publisher { get; set; }
         public string ISBN { get; set; }
         public string Description { get; set; }
+
+      
     }
 }

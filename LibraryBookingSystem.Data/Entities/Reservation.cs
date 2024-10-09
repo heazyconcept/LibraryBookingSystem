@@ -13,14 +13,20 @@ namespace LibraryBookingSystem.Data.Entities
         public DateTime ExpiryDate { get; set; }
         public ReservationStatus Status { get; set; }
 
-        public static Reservation CreateNew(string bookId, string iD)
+        public One<Book> BookEntity { get; set; }
+
+        [Ignore]
+        public Book Book => BookEntity.ToEntityAsync().Result;
+
+        public static Reservation CreateNew(Book book, string iD)
         {
             return new Reservation
             {
-                BookId = bookId,
+                BookId = book.ID,
                 CustomerId = iD,
                 ExpiryDate = DateTime.Now.AddDays(2),
-                Status = ReservationStatus.Reserved
+                Status = ReservationStatus.Reserved,
+                BookEntity = new (book)
             };
         }
 

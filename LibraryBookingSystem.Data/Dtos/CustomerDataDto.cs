@@ -1,6 +1,6 @@
 namespace LibraryBookingSystem.Data.Dtos
 {
-    public class CustomerDataDto
+    public class CustomerDataDto:IncludeAudit
     {
         public string CustomerId { get; set; }
         public string FirstName { get; set; }

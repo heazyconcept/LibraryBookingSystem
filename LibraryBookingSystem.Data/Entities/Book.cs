@@ -1,5 +1,7 @@
 ﻿using LibraryBookingSystem.Data.Common;
+using LibraryBookingSystem.Data.Dtos;
 using LibraryBookingSystem.Data.Enums;
+using LibraryBookingSystem.Data.Sessions;
 using MongoDB.Entities;
 
 namespace LibraryBookingSystem.Data.Entities
@@ -22,5 +24,39 @@ namespace LibraryBookingSystem.Data.Entities
 
         [Ignore]
         public Customer ReservedOrCollectedByCustomer => ReservedOrCollectedByCustomerEntity.ToEntityAsync().Result;
+
+        public static Book CreateNew(BookRequestDto request, AdminSession adminSession)
+        {
+            return new Book
+            {
+                Name = request.Name,
+                Genre = request.Genre,
+                ShelfNumber = request.ShelfNumber,
+                Author = request.Author,
+                Publisher = request.Publisher,
+                ISBN = request.ISBN,
+                Description = request.Description,
+                BookStatus = BookStatus.Available,
+                AvailableDate = DateTime.Now,
+                CreatedBy = adminSession.Email
+            };
+        }
+
+        public void UpdateBook(BookRequestDto request, AdminSession admin)
+        {
+            Name = request.Name;
+            Genre = request.Genre;
+            ShelfNumber = request.ShelfNumber;
+            Author = request.Author;
+            Publisher = request.Publisher;
+            ISBN = request.ISBN;
+            Description = request.Description;
+            ModifiedBy = admin.Email;
+        }
+
+          public void UpdateStatus(BookStatus status)
+        {
+            BookStatus = status;
+        }
     }
 }

@@ -5,8 +5,12 @@ namespace LibraryBookingSystem.Data.Mappings
 {
     public static class BookMappings
     {
-        public static BookDataDto ToBookDataDto(this Book book)
+        public static BookDataDto ToBookDataDto(this Book? book)
         {
+            if (book == null)
+            {
+                return new BookDataDto();
+            }
             return new BookDataDto
             {
                 BookId = book.ID,
@@ -18,7 +22,7 @@ namespace LibraryBookingSystem.Data.Mappings
                 AvailableDate = book.AvailableDate,
                 Genre = book.Genre,
                 Publisher = book.Publisher,
-                ReservedOrCollectedBy = book.ReservedOrCollectedByCustomer.ToCustomerDataDto(),
+                ReservedOrCollectedBy = book.ReservedOrCollectedByCustomer?.ToCustomerDataDto(),
                 ReservedOrCollectedDate = book.ReservedOrCollectedDate,
                 ShelfNumber = book.ShelfNumber
             };
