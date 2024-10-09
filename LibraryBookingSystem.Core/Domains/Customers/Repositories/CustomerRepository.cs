@@ -22,6 +22,12 @@ namespace LibraryBookingSystem.Core.Domains.Customers.Repositories
             return customer;
         }
 
+        public Customer? GetCustomerByEmail(string email)
+        {
+            var customer = DB.Queryable<Customer>().Where(x=>x.EmailAddress == email).FirstOrDefault() ?? throw new BadRequestException("Invalid Credentials");
+            return customer;
+        }
+
         public async Task<Pagination<CustomerDataDto>> ListCustomers(int page, int pageSize, string search = "")
         {
             var query = DB.Queryable<Customer>().AsQueryable();

@@ -1,5 +1,6 @@
 using LibraryBookingSystem.Data.Dtos;
 using LibraryBookingSystem.Data.Entities;
+using LibraryBookingSystem.Data.Sessions;
 
 namespace LibraryBookingSystem.Data.Mappings
 {
@@ -50,6 +51,17 @@ namespace LibraryBookingSystem.Data.Mappings
                 CreatedDate = customer.CreatedOn,
                 ModifiedBy = customer.ModifiedBy,
                 ModifiedDate = customer.ModifiedOn
+            };
+        }
+
+        public static UserSessions ToUserSession (this Customer customer)
+        {
+            return new UserSessions
+            {
+                Email = customer.EmailAddress,
+                FirstName = customer.FirstName,
+                LastName = customer.LastName,
+                UserId = customer.ID
             };
         }
     }

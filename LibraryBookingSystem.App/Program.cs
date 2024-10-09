@@ -1,3 +1,4 @@
+using LibraryBookingSystem.App.Filters;
 using LibraryBookingSystem.Data.Settings;
 using MongoDB.Driver;
 using MongoDB.Entities;
@@ -20,6 +21,8 @@ builder.Services.AddControllers()
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.Configure<AppSettings>(appSettingsSection);
+builder.Services.AddTransient<UserSessionFilters>();
+builder.Services.AddTransient<AdminUserSerssionFilter>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -4,12 +4,15 @@
     {
         public string ConnectionString { get; set; }
         public string DatabaseName { get; set; }
-        public IdentityServer IdentityServer { get; set; }
+        public JWT JWT { get; set; }
 
     }
 
-    public class IdentityServer{
-        public string ClientId { get; set; }
-        public string ClientSecret { get; set; }
+
+    public class JWT {
+        public string Key { get; set; }  
+        public string Issuer { get; set; }
+        public string Audience { get; set; }
     }
+    
 }

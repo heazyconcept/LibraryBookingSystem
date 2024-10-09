@@ -1,5 +1,6 @@
 using LibraryBookingSystem.Common.ExceptionFilters;
 using LibraryBookingSystem.Common.Helpers;
+using LibraryBookingSystem.Core.Interfaces.Implementations;
 using LibraryBookingSystem.Core.Interfaces.Repositories;
 using LibraryBookingSystem.Data;
 using LibraryBookingSystem.Data.Dtos;
@@ -11,7 +12,7 @@ using MongoDB.Entities;
 
 namespace LibraryBookingSystem.Core.Domains.Books.Implementations
 {
-    public class BookService
+    public class BookService: IBookService
     {
         private readonly IBookRepository _bookRepository;
         private readonly ICustomerRepository _customerRepository;

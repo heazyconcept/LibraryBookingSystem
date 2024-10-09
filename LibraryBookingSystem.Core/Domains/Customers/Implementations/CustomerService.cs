@@ -1,25 +1,36 @@
+using LibraryBookingSystem.Common.ExceptionFilters;
 using LibraryBookingSystem.Common.Helpers;
+using LibraryBookingSystem.Core.Interfaces.Implementations;
 using LibraryBookingSystem.Core.Interfaces.Repositories;
 using LibraryBookingSystem.Data;
 using LibraryBookingSystem.Data.Dtos;
 using LibraryBookingSystem.Data.Entities;
+using LibraryBookingSystem.Data.Enums;
 using LibraryBookingSystem.Data.Mappings;
 using MongoDB.Entities;
 
 namespace LibraryBookingSystem.Core.Domains.Customers.Implementations
 {
-    public class CustomerService
+    public class CustomerService: ICustomerService
     {
         private readonly ICustomerRepository _customerRepository;
         private readonly ICollectionRepository _collectionRepository;
         private readonly IReservationRepository _reservationRepository;
         private readonly INotificationRepository _notificationRepository;
-        public CustomerService(ICustomerRepository customerRepository, ICollectionRepository collectionRepository, IReservationRepository reservationRepository, INotificationRepository notificationRepository)
+
+        private readonly ITokenService _tokenService;
+        public CustomerService(
+            ICustomerRepository customerRepository,
+            ICollectionRepository collectionRepository,
+            IReservationRepository reservationRepository,
+            INotificationRepository notificationRepository,
+            ITokenService tokenService)
         {
             _customerRepository = customerRepository;
             _collectionRepository = collectionRepository;
             _reservationRepository = reservationRepository;
             _notificationRepository = notificationRepository;
+            _tokenService = tokenService;
         }
 
         public async Task<StandardResponse<dynamic>> RegisterCustomer(RegisterDto request)
@@ -45,6 +56,23 @@ namespace LibraryBookingSystem.Core.Domains.Customers.Implementations
             var notifications = _notificationRepository.ListCustomerNotifications(customerId);
             var result = customer.ToCustomerViewDto(reservations, collections, notifications);
             return StandardResponse<CustomerViewDto>.SuccessMessage("Data retrieved successfully", result);
+        }
+
+        public async Task<StandardResponse<CustomerLoginResponseDto>> CustomerLogin(CustomerLoginRequestDto request, string ipAddress, string userAgent)
+        {
+            var customer = _customerRepository.GetCustomerByEmail(request.EmailAddress);
+            var passwordHash = GeneralUtilities.Encrypt(request.Password, customer.PasswordSalt);
+            if (passwordHash != customer.Password)
+                throw new BadRequestException("Invalid Credentials");
+            
+            var token = await _tokenService.CreateNewToken(userAgent, ipAddress, customer.ID, UserType.Customer);
+            var userSession = customer.ToUserSession();
+            var result = new CustomerLoginResponseDto
+            {
+                AccessToken = token.TokenString,
+                User = userSession
+            };
+            return StandardResponse<CustomerLoginResponseDto>.SuccessMessage("Login successful", result);
         }
     }
 }
