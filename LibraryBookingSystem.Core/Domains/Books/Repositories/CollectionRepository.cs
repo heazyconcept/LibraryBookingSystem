@@ -1,10 +1,8 @@
 using LibraryBookingSystem.Common.ExceptionFilters;
 using LibraryBookingSystem.Common.Helpers;
 using LibraryBookingSystem.Core.Interfaces.Repositories;
-using LibraryBookingSystem.Data.Dtos;
 using LibraryBookingSystem.Data.Entities;
 using LibraryBookingSystem.Data.Enums;
-using LibraryBookingSystem.Data.Mappings;
 using MongoDB.Entities;
 
 namespace LibraryBookingSystem.Core.Domains.Books.Repositories

@@ -1,5 +1,4 @@
 ﻿using LibraryBookingSystem.Common.Helpers;
-using LibraryBookingSystem.Common.LoggingMiddleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 

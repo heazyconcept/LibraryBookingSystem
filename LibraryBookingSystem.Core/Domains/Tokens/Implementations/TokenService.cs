@@ -1,8 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
-using LibraryBookingSystem.Common.Extensions;
 using LibraryBookingSystem.Core.Interfaces.Implementations;
 using LibraryBookingSystem.Core.Interfaces.Repositories;
 using LibraryBookingSystem.Data.Entities;
@@ -10,7 +8,6 @@ using LibraryBookingSystem.Data.Enums;
 using LibraryBookingSystem.Data.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json;
 
 namespace LibraryBookingSystem.Core.Domains.Tokens.Implementations
 {

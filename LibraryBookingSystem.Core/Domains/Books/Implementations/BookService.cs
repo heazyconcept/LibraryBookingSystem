@@ -1,3 +1,4 @@
+using Hangfire;
 using LibraryBookingSystem.Common.ExceptionFilters;
 using LibraryBookingSystem.Common.Helpers;
 using LibraryBookingSystem.Core.Interfaces.Implementations;
@@ -12,7 +13,7 @@ using MongoDB.Entities;
 
 namespace LibraryBookingSystem.Core.Domains.Books.Implementations
 {
-    public class BookService: IBookService
+    public class BookService : IBookService
     {
         private readonly IBookRepository _bookRepository;
         private readonly ICustomerRepository _customerRepository;
@@ -29,8 +30,8 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
 
         public async Task<StandardResponse<Pagination<BookDataDto>>> ListBooks(int page, int pageSize, string search = "", bool? isAvailable = null)
         {
-            var result  = await _bookRepository.ListBooks(page, pageSize, search, isAvailable);
-            var mappedResult = result.Result.Select(x=> new BookDataDto
+            var result = await _bookRepository.ListBooks(page, pageSize, search, isAvailable);
+            var mappedResult = result.Result.Select(x => new BookDataDto
             {
                 BookId = x.ID,
                 Name = x.Name,
@@ -49,21 +50,22 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
             return StandardResponse<Pagination<BookDataDto>>.SuccessMessage("Books retrieved successfully", mappedResponse);
         }
 
-        public  StandardResponse<BookDataDto> GetBookDetails(string id)
+        public StandardResponse<BookDataDto> GetBookDetails(string id)
         {
-            var result =  _bookRepository.GetBook(id);
+            var result = _bookRepository.GetBook(id);
             return StandardResponse<BookDataDto>.SuccessMessage("Book retrieved successfully", result);
         }
-        
+
         public async Task<StandardResponse<dynamic>> ReserveBook(string bookId, UserSessions user)
         {
             var book = _bookRepository.GetBookRaw(bookId);
-            if(book.BookStatus != BookStatus.Available)
+            if (book.BookStatus != BookStatus.Available)
                 throw new BadRequestException("bookErr-Book is not available for reservation, You can be notified when it is available");
             var customer = _customerRepository.GetCustomer(user.UserId);
             var result = await _bookRepository.ReserveBook(bookId, customer);
-            var newReservation = Reservation.CreateNew(book, customer.ID);  
-            await newReservation.SaveAsync();  
+            var newReservation = Reservation.CreateNew(book, customer.ID);
+            await newReservation.SaveAsync();
+            BackgroundJob.Schedule(() => ExpireReservation(newReservation.ID), TimeSpan.FromDays(2));
             //TODO: Schedule a job to expire the reservation after 2 days
             return StandardResponse<dynamic>.SuccessMessage("Book reserved successfully", result);
         }
@@ -71,22 +73,23 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
         public async Task<StandardResponse<dynamic>> CancelReservation(string bookId, UserSessions user)
         {
             var book = _bookRepository.GetBookRaw(bookId);
-            if(book.BookStatus != BookStatus.Reserved)
+            if (book.BookStatus != BookStatus.Reserved)
                 throw new BadRequestException("bookErr-Book is not reserved");
-            if(book.ReservedOrCollectedByCustomer.ID != user.UserId)
+            if (book.ReservedOrCollectedByCustomer.ID != user.UserId)
                 throw new BadRequestException("bookErr-You are not authorized to cancel this reservation");
             var customer = _customerRepository.GetCustomer(user.UserId);
             var reservation = _reservationRepository.GetActiveUserReservation(bookId, customer.ID);
             reservation.UpdateStatus(ReservationStatus.Cancelled);
             await _bookRepository.CancelReservation(book);
             await reservation.SaveAsync();
+            BackgroundJob.Enqueue<NotificationJob>(x => x.SendNotification(bookId));
             return StandardResponse<dynamic>.SuccessMessage("Reservation cancelled successfully");
         }
 
         public async Task<StandardResponse<dynamic>> NotifyBookAvailability(string bookId, UserSessions user)
         {
             var book = _bookRepository.GetBook(bookId);
-            if(book.BookStatus == BookStatus.Available)
+            if (book.BookStatus == BookStatus.Available)
                 throw new BadRequestException("bookErr-This book is already available for collection");
             var customer = _customerRepository.GetCustomer(user.UserId);
             var notification = Notification.CreateNew(bookId, customer.ID, book.Name);
@@ -124,6 +127,7 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
             await _bookRepository.CollectBook(book, customer, admin, request.ExpectedReturnDate);
             var newCollection = Collection.CreateNew(book, customer.ID, request.ExpectedReturnDate);
             await newCollection.SaveAsync();
+            await _reservationRepository.UpdateReservation(book.ID, customer.ID);
             return StandardResponse<dynamic>.SuccessMessage("Book collected successfully");
         }
 
@@ -134,9 +138,10 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
                 throw new BadRequestException("bookErr-Book has not been collected");
             if (book.ReservedOrCollectedByCustomer.ID != request.CustomerId)
                 throw new BadRequestException("bookErr-This book was not collected by this user");
-            
+
             var collection = _collectionRepository.UpdateForReturn(request.CustomerId, request.BookId);
             await _bookRepository.ReturnBook(book, admin);
+            BackgroundJob.Enqueue<NotificationJob>(x => x.SendNotification(request.BookId));
             //TODO: Notify customer that the book is available
             return StandardResponse<dynamic>.SuccessMessage("Book returned successfully");
         }
@@ -157,7 +162,7 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
         {
             var result = await _collectionRepository.ListCollections(page, pageSize);
 
-             var mappedResult = result.Result.Select(x=> new CollectionDto
+            var mappedResult = result.Result.Select(x => new CollectionDto
             {
                 ActualReturnDate = x.ActualReturnDate,
                 Book = x.Book.ToBookDataDto(),
@@ -177,7 +182,7 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
         {
             var result = await _reservationRepository.ListReservations(page, pageSize);
 
-             var mappedResult = result.Result.Select(x=> new ReservationDto
+            var mappedResult = result.Result.Select(x => new ReservationDto
             {
                 Book = x.Book.ToBookDataDto(),
                 CustomerId = x.CustomerId,
@@ -190,6 +195,18 @@ namespace LibraryBookingSystem.Core.Domains.Books.Implementations
             }).ToList();
             var mappedResponse = new Pagination<ReservationDto>(mappedResult, result.TotalCount, page, pageSize);
             return StandardResponse<Pagination<ReservationDto>>.SuccessMessage("Reservations retrieved successfully", mappedResponse);
+        }
+
+        public async Task ExpireReservation(string reservationId)
+        {
+            var reservation = await _reservationRepository.ExpireReservation(reservationId);
+            if (reservation != null)
+            {
+                var book = _bookRepository.GetBookRaw(reservation.BookId);
+                book.UpdateStatus(BookStatus.Available);
+                await book.SaveAsync();
+            }
+
         }
 
 

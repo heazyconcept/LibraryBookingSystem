@@ -1,3 +1,7 @@
+using Hangfire;
+using Hangfire.Mongo;
+using Hangfire.Mongo.Migration.Strategies;
+using Hangfire.Mongo.Migration.Strategies.Backup;
 using LibraryBookingSystem.App.Filters;
 using LibraryBookingSystem.App.Middlewares;
 using LibraryBookingSystem.Common;
@@ -7,8 +11,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using MongoDB.Entities;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -52,8 +54,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.JWT.Key)),
             RoleClaimType = "role"
         };
-       
+
     });
+var mongoUrlBuilder = new MongoUrlBuilder(appSettings.ConnectionString);
+mongoUrlBuilder.DatabaseName = appSettings.DatabaseName;
+var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, new MongoStorageOptions
+    {
+        MigrationOptions = new MongoMigrationOptions
+        {
+            MigrationStrategy = new MigrateMongoMigrationStrategy(),
+            BackupStrategy = new CollectionMongoBackupStrategy()
+        },
+        Prefix = "hangfire",
+        CheckConnection = true
+    })
+);
+// Add the processing server as IHostedService
+builder.Services.AddHangfireServer(serverOptions =>
+{
+    serverOptions.ServerName = $"Hangfire.library";
+});
 
 var app = builder.Build();
 
@@ -68,6 +93,7 @@ app.UseHttpsRedirection();
 var loggerFactory = app.Services.GetRequiredService<ILoggerFactory>();
 app.UseCustomExceptionHandler();
 app.ConfigureCommonApp(loggerFactory);
+app.UseHangfireDashboard();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,10 +1,8 @@
 using LibraryBookingSystem.Common.ExceptionFilters;
 using LibraryBookingSystem.Common.Helpers;
 using LibraryBookingSystem.Core.Interfaces.Repositories;
-using LibraryBookingSystem.Data.Dtos;
 using LibraryBookingSystem.Data.Entities;
 using LibraryBookingSystem.Data.Enums;
-using LibraryBookingSystem.Data.Mappings;
 using MongoDB.Entities;
 
 namespace LibraryBookingSystem.Core.Domains.Books.Repositories
@@ -32,6 +30,35 @@ namespace LibraryBookingSystem.Core.Domains.Books.Repositories
             var response = await Pagination<Reservation>.CreateAsync(query, page, pageSize);
             return response;
         }
-       
+
+        public async Task UpdateReservation(string bookId, string customerId)
+        {
+            try
+            {
+                var reservation = GetActiveUserReservation(bookId, customerId);
+                reservation.Status = ReservationStatus.Collected;
+                await reservation.SaveAsync();
+            }
+            catch (HttpException ex)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+
+        public async Task<Reservation?> ExpireReservation(string reservationId)
+        {
+            var reservation = DB.Queryable<Reservation>().Where(x => x.ID == reservationId).FirstOrDefault();
+            if(reservation != null && reservation.Status == ReservationStatus.Reserved){
+                reservation.Status = ReservationStatus.Expired;
+                await reservation.SaveAsync();
+                return reservation;
+            }
+            return null;
+        }   
     }
 }

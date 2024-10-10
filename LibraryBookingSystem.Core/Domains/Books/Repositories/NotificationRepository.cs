@@ -12,5 +12,11 @@ namespace LibraryBookingSystem.Core.Domains.Books.Repositories
             return notifications;
         }
 
+        public List<Notification> ListActiveBookNotifications(string bookId)
+        {
+            var notifications = DB.Queryable<Notification>().Where(x => x.BookId == bookId && x.NotificationStatus == Data.Enums.NotificationStatus.Pending).ToList();
+            return notifications;
+        }
+
     }
 }

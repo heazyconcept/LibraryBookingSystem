@@ -1,5 +1,4 @@
 using LibraryBookingSystem.Common.Helpers;
-using LibraryBookingSystem.Data.Dtos;
 using LibraryBookingSystem.Data.Entities;
 
 namespace LibraryBookingSystem.Core.Interfaces.Repositories
