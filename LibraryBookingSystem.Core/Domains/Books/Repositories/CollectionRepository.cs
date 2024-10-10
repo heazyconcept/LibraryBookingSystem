@@ -16,7 +16,7 @@ namespace LibraryBookingSystem.Core.Domains.Books.Repositories
         {
             var collection = DB.Queryable<Collection>()
                 .Where(c => c.CustomerId == customerId && c.BookId == bookId && c.Status != CollectionStatus.Returned)
-                .FirstOrDefault() ?? throw new BadRequestException("Collection not found");
+                .FirstOrDefault() ?? throw new BadRequestException("collectionErr-Collection not found");
             return collection;
         }
 
@@ -35,23 +35,12 @@ namespace LibraryBookingSystem.Core.Domains.Books.Repositories
             return collections;
         }
 
-        public async Task<Pagination<CollectionDto>> ListCollections(int page, int pageSize)
+        public async Task<Pagination<Collection>> ListCollections(int page, int pageSize)
         {
             var query = DB.Queryable<Collection>().AsQueryable();
 
-            var mappedResult = query.Select(x=> new CollectionDto
-            {
-                ActualReturnDate = x.ActualReturnDate,
-                Book = x.Book.ToBookDataDto(),
-                CustomerId = x.CustomerId,
-                ExpectedReturnDate = x.ExpectedReturnDate,
-                Status = x.Status,
-                CreatedBy = x.CreatedBy,
-                CreatedDate = x.CreatedOn,
-                ModifiedBy = x.ModifiedBy,
-                ModifiedDate = x.ModifiedOn
-            });
-            var response = await Pagination<CollectionDto>.CreateAsync(mappedResult, page, pageSize);
+           
+            var response = await Pagination<Collection>.CreateAsync(query, page, pageSize);
             return response;
         }
 

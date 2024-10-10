@@ -8,6 +8,6 @@ namespace LibraryBookingSystem.Core.Interfaces.Repositories
     {
         Reservation GetActiveUserReservation(string bookId, string customerId);
         List<Reservation> ListCustomerReservations(string customerId);
-        Task<Pagination<ReservationDto>> ListReservations(int page, int pageSize);
+        Task<Pagination<Reservation>> ListReservations(int page, int pageSize);
     }
 }

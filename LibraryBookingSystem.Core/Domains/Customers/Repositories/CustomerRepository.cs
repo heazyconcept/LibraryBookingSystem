@@ -13,18 +13,18 @@ namespace LibraryBookingSystem.Core.Domains.Customers.Repositories
         {
            var existing =  DB.Queryable<Customer>().Where(x => x.EmailAddress.ToLower() == email.ToLower() || x.PhoneNumber == phoneNumber).FirstOrDefault();
            if(existing != null)
-                throw new BadRequestException("Customer already exists");
+                throw new BadRequestException("custErr-Customer already exists");
         }
 
         public Customer? GetCustomer(string customerId)
         {
-            var customer = DB.Queryable<Customer>().Where(x=>x.ID == customerId).FirstOrDefault() ?? throw new BadRequestException("Customer not found");
+            var customer = DB.Queryable<Customer>().Where(x=>x.ID == customerId).FirstOrDefault() ?? throw new BadRequestException("custErr-Customer not found");
             return customer;
         }
 
         public Customer? GetCustomerByEmail(string email)
         {
-            var customer = DB.Queryable<Customer>().Where(x=>x.EmailAddress == email).FirstOrDefault() ?? throw new BadRequestException("Invalid Credentials");
+            var customer = DB.Queryable<Customer>().Where(x=>x.EmailAddress == email).FirstOrDefault() ?? throw new BadRequestException("authErr-Invalid Credentials");
             return customer;
         }
 

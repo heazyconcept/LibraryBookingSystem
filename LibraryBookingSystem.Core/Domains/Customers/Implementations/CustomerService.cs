@@ -63,7 +63,7 @@ namespace LibraryBookingSystem.Core.Domains.Customers.Implementations
             var customer = _customerRepository.GetCustomerByEmail(request.EmailAddress);
             var passwordHash = GeneralUtilities.Encrypt(request.Password, customer.PasswordSalt);
             if (passwordHash != customer.Password)
-                throw new BadRequestException("Invalid Credentials");
+                throw new BadRequestException("authErr-Invalid Credentials");
             
             var token = await _tokenService.CreateNewToken(userAgent, ipAddress, customer.ID, UserType.Customer);
             var userSession = customer.ToUserSession();

@@ -40,7 +40,7 @@ namespace LibraryBookingSystem.App.Filters
             }
             if(token.UserType != Data.Enums.UserType.Admin)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new ForbidResult();
                 return;
             }
             var admin =  await _adminUsersRepository.GetAdminUser(token.UserId);

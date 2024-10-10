@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using LibraryBookingSystem.App.Filters;
 using LibraryBookingSystem.Common.Helpers;
 using LibraryBookingSystem.Core.Interfaces.Implementations;
@@ -55,7 +51,7 @@ namespace LibraryBookingSystem.App.Controllers
         [ServiceFilter(typeof(UserSessionFilters))]
         [Route("book/{bookId}")]
         [HttpGet]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<Pagination<BookDataDto>>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<BookDataDto>))]
         public async Task<IActionResult> GetBookDetails([FromRoute] string bookId)
         {
             return Ok(_bookService.GetBookDetails(bookId));
@@ -65,30 +61,30 @@ namespace LibraryBookingSystem.App.Controllers
         [ServiceFilter(typeof(UserSessionFilters))]
         [Route("book/{bookId}/reserve")]
         [HttpPost]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<Pagination<BookDataDto>>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<dynamic>))]
         public async Task<IActionResult> ReserveBook([FromRoute] string bookId)
         {
-            return Ok(_bookService.ReserveBook(bookId, UserSessions));
+            return Ok(await _bookService.ReserveBook(bookId, UserSessions));
         }
 
         [Authorize]
         [ServiceFilter(typeof(UserSessionFilters))]
         [Route("book/{bookId}/reservation/cancel")]
         [HttpPost]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<Pagination<BookDataDto>>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<dynamic>))]
         public async Task<IActionResult> CancelReservation([FromRoute] string bookId)
         {
-            return Ok(_bookService.CancelReservation(bookId, UserSessions));
+            return Ok(await _bookService.CancelReservation(bookId, UserSessions));
         }
 
         [Authorize]
         [ServiceFilter(typeof(UserSessionFilters))]
         [Route("book/{bookId}/notify")]
         [HttpPost]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<Pagination<BookDataDto>>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<dynamic>))]
         public async Task<IActionResult> NotifyUserofAvalability([FromRoute] string bookId)
         {
-            return Ok(_bookService.NotifyBookAvailability(bookId, UserSessions));
+            return Ok(await _bookService.NotifyBookAvailability(bookId, UserSessions));
         }
 
     }

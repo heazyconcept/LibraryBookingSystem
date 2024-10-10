@@ -39,7 +39,7 @@ namespace LibraryBookingSystem.App.Filters
             }
             if(token.UserType != Data.Enums.UserType.Customer)
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new ForbidResult();
                 return;
             }
             var customer =  _customerRepository.GetCustomer(token.UserId);

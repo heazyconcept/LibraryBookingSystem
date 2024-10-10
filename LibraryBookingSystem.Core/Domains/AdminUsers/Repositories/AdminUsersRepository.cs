@@ -17,13 +17,13 @@ namespace LibraryBookingSystem.Core.Domains.AdminUsers.Repositories
 
         public async Task<AdminUser?> GetAdminUserByEmail(string email)
         {
-            var admin = DB.Queryable<AdminUser>().Where(x => x.Email == email).FirstOrDefault() ?? throw new BadRequestException("Invalid Credentials");
+            var admin = DB.Queryable<AdminUser>().Where(x => x.Email == email).FirstOrDefault() ?? throw new BadRequestException("authErr-Invalid Credentials");
             return admin;
         }
 
          public async Task<AdminUser?> GetAdminUser(string id)
         {
-            var admin = DB.Queryable<AdminUser>().Where(x => x.ID == id).FirstOrDefault() ?? throw new BadRequestException("Admin Not found");
+            var admin = DB.Queryable<AdminUser>().Where(x => x.ID == id).FirstOrDefault() ?? throw new BadRequestException("adminErr-Admin Not found");
             return admin;
         }
     }

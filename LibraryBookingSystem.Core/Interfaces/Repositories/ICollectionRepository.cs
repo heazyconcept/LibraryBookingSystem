@@ -12,6 +12,6 @@ namespace LibraryBookingSystem.Core.Interfaces.Repositories
 
         List<Collection> ListCustomerCollections(string customerId);
 
-        Task<Pagination<CollectionDto>> ListCollections(int page, int pageSize);
+        Task<Pagination<Collection>> ListCollections(int page, int pageSize);
     }
 }

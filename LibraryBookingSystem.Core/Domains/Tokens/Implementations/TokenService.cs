@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
+using LibraryBookingSystem.Common.Extensions;
 using LibraryBookingSystem.Core.Interfaces.Implementations;
 using LibraryBookingSystem.Core.Interfaces.Repositories;
 using LibraryBookingSystem.Data.Entities;
@@ -12,12 +10,12 @@ using LibraryBookingSystem.Data.Enums;
 using LibraryBookingSystem.Data.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json;
 
 namespace LibraryBookingSystem.Core.Domains.Tokens.Implementations
 {
-    public class TokenService: ITokenService
+    public class TokenService : ITokenService
     {
-
         private readonly ITokenRepository _tokenRepository;
         private readonly JWT _JWT;
 
@@ -43,25 +41,27 @@ namespace LibraryBookingSystem.Core.Domains.Tokens.Implementations
 
         public string GenerateToken(string userId, UserType userType)
         {
-            
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_JWT.Key);
+            var roles = new List<string> { userType.ToString() };
             var claims = new List<Claim>
             {
-                new(ClaimTypes.NameIdentifier, userId),
-                new(ClaimTypes.Role, userType.ToString())
+                new Claim(JwtRegisteredClaimNames.Sub, userId),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(JwtRegisteredClaimNames.NameId, userId),
+                new("role", userType.ToString())
             };
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(24),
-                Issuer = _JWT.Issuer,
-                Audience = _JWT.Audience,
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_JWT.Key));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _JWT.Issuer,
+                audience: _JWT.Audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddHours(24),
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

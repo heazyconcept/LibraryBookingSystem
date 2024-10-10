@@ -6,6 +6,6 @@ namespace LibraryBookingSystem.Core.Interfaces.Implementations
     public interface IAdminUserService
     {
         Task<StandardResponse<dynamic>> CreateAdmin(CreateAdminDto request);
-        Task<StandardResponse<CustomerLoginResponseDto>> AdminLogin(CustomerLoginRequestDto request, string ipAddress, string userAgent);
+        Task<StandardResponse<AdminLoginResponseDto>> AdminLogin(CustomerLoginRequestDto request, string ipAddress, string userAgent);
     }
 }

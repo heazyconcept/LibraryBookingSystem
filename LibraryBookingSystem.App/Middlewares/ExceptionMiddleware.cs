@@ -56,4 +56,12 @@ namespace LibraryBookingSystem.App.Middlewares
        
 
     }
+
+    public static class CustomExceptionHandlerExtensions
+    {
+        public static IApplicationBuilder UseCustomExceptionHandler(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<ExceptionMiddleware>();
+        }
+    }
 }

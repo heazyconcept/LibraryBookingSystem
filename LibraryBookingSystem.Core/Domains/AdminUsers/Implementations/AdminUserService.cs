@@ -26,12 +26,12 @@ namespace LibraryBookingSystem.Core.Domains.AdminUsers.Implementations
             return StandardResponse<dynamic>.SuccessMessage("Admin created successfully");
         }
 
-        public async Task<StandardResponse<CustomerLoginResponseDto>> AdminLogin(CustomerLoginRequestDto request, string ipAddress, string userAgent)
+        public async Task<StandardResponse<AdminLoginResponseDto>> AdminLogin(CustomerLoginRequestDto request, string ipAddress, string userAgent)
         {
             var adminUser = await _adminUserRepository.GetAdminUserByEmail(request.EmailAddress);
             var passwordHash = GeneralUtilities.Encrypt(request.Password, adminUser.PasswordSalt);
             if (passwordHash != adminUser.Password)
-                throw new BadRequestException("Invalid Credentials");
+                throw new BadRequestException("authErr-Invalid Credentials");
             
             var token = await _tokenService.CreateNewToken(userAgent, ipAddress, adminUser.ID, UserType.Admin);
             var userSession = adminUser.ToAdminSession();
@@ -40,7 +40,7 @@ namespace LibraryBookingSystem.Core.Domains.AdminUsers.Implementations
                 AccessToken = token.TokenString,
                 User = userSession
             };
-            return StandardResponse<CustomerLoginResponseDto>.SuccessMessage("Login successful", result);
+            return StandardResponse<AdminLoginResponseDto>.SuccessMessage("Login successful", result);
         }
 
 

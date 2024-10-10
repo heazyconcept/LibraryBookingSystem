@@ -24,22 +24,12 @@ namespace LibraryBookingSystem.Core.Domains.Books.Repositories
            return reservations;
        }
 
-        public async Task<Pagination<ReservationDto>> ListReservations(int page, int pageSize)
+        public async Task<Pagination<Reservation>> ListReservations(int page, int pageSize)
         {
             var query = DB.Queryable<Reservation>().AsQueryable();
 
-            var mappedResult = query.Select(x=> new ReservationDto
-            {
-                Book = x.Book.ToBookDataDto(),
-                CustomerId = x.CustomerId,
-                Status = x.Status,
-                ExpiryDate = x.ExpiryDate,
-                CreatedBy = x.CreatedBy,
-                CreatedDate = x.CreatedOn,
-                ModifiedBy = x.ModifiedBy,
-                ModifiedDate = x.ModifiedOn
-            });
-            var response = await Pagination<ReservationDto>.CreateAsync(mappedResult, page, pageSize);
+           
+            var response = await Pagination<Reservation>.CreateAsync(query, page, pageSize);
             return response;
         }
        

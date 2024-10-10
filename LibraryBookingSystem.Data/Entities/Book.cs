@@ -23,7 +23,7 @@ namespace LibraryBookingSystem.Data.Entities
         public One<Customer> ReservedOrCollectedByCustomerEntity { get; set; }
 
         [Ignore]
-        public Customer ReservedOrCollectedByCustomer => ReservedOrCollectedByCustomerEntity.ToEntityAsync().Result;
+        public Customer? ReservedOrCollectedByCustomer => ReservedOrCollectedByCustomerEntity?.ToEntityAsync().Result;
 
         public static Book CreateNew(BookRequestDto request, AdminSession adminSession)
         {

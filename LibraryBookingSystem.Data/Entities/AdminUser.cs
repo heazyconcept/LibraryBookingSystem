@@ -22,8 +22,8 @@ namespace LibraryBookingSystem.Data.Entities
                 FirstName = firstName,
                 LastName = lastName,
                 Email = email,
-                Password = password,
-                PasswordSalt = passwordHash
+                Password = passwordHash,
+                PasswordSalt = PasswordSalt
             };
         }
     }

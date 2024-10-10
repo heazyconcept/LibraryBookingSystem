@@ -21,13 +21,13 @@ namespace LibraryBookingSystem.App.Controllers
             _bookService = bookService;
         }
 
-        [Route("")]
-        [HttpPost]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<dynamic>))]
-        public async Task<IActionResult> AddAdmin([FromBody] CreateAdminDto request)
-        {
-            return Ok(await _adminService.CreateAdmin(request));
-        }
+        // [Route("")]
+        // [HttpPost]
+        // [Produces("application/json", "application/xml", Type = typeof(StandardResponse<dynamic>))]
+        // public async Task<IActionResult> AddAdmin([FromBody] CreateAdminDto request)
+        // {
+        //     return Ok(await _adminService.CreateAdmin(request));
+        // }
 
         [Route("login")]
         [HttpPost]
@@ -37,37 +37,47 @@ namespace LibraryBookingSystem.App.Controllers
             return Ok(await _adminService.AdminLogin(request, ipAddress, userAgent));
         }
 
-         [Authorize(Roles = "Admin")]
-         [ServiceFilter(typeof(AdminUserSerssionFilter))]
+        [Authorize]
+        [ServiceFilter(typeof(AdminUserSerssionFilter))]
         [Route("book")]
         [HttpPost]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<CustomerLoginResponseDto>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<BookDataDto>))]
         public async Task<IActionResult> CreateBook([FromBody] BookRequestDto request)
         {
             return Ok(await _bookService.CreateBook(request, AdminSession));
         }
 
-        [Authorize(Roles = "Admin")]
-         [ServiceFilter(typeof(AdminUserSerssionFilter))]
+        [Authorize]
+        [ServiceFilter(typeof(AdminUserSerssionFilter))]
+        [Route("books")]
+        [HttpGet]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<Pagination<BookDataDto>>))]
+        public async Task<IActionResult> ListBooks([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string search = "", [FromQuery] bool? isAvailable = null)
+        {
+            return Ok(await _bookService.ListBooks(page, pageSize, search, isAvailable));
+        }
+
+        [Authorize]
+        [ServiceFilter(typeof(AdminUserSerssionFilter))]
         [Route("book/{bookId}")]
         [HttpPut]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<CustomerLoginResponseDto>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<BookDataDto>))]
         public async Task<IActionResult> UpdateBook([FromRoute] string bookId, [FromBody] BookRequestDto request)
         {
             return Ok(await _bookService.UpdateBook(bookId, request, AdminSession));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [ServiceFilter(typeof(AdminUserSerssionFilter))]
         [Route("book/collection")]
         [HttpPost]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<CustomerLoginResponseDto>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<dynamic>))]
         public async Task<IActionResult> ProcessBookCollection([FromBody] BookCollectionRequestDto request)
         {
             return Ok(await _bookService.ProcessBookCollection(request, AdminSession));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [ServiceFilter(typeof(AdminUserSerssionFilter))]
         [Route("book/return")]
         [HttpPost]
@@ -78,7 +88,7 @@ namespace LibraryBookingSystem.App.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [ServiceFilter(typeof(AdminUserSerssionFilter))]
         [Route("book/reservation")]
         [HttpPost]
@@ -89,7 +99,7 @@ namespace LibraryBookingSystem.App.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [ServiceFilter(typeof(AdminUserSerssionFilter))]
         [Route("book/collections")]
         [HttpGet]
@@ -100,11 +110,11 @@ namespace LibraryBookingSystem.App.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [ServiceFilter(typeof(AdminUserSerssionFilter))]
         [Route("book/reservations")]
         [HttpGet]
-        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<Pagination<CollectionDto>>))]
+        [Produces("application/json", "application/xml", Type = typeof(StandardResponse<Pagination<ReservationDto>>))]
         public async Task<IActionResult> ListReservations([FromQuery] int page = 1, int pageSize = 10)
         {
             return Ok(await _bookService.ListReservations(page, pageSize));

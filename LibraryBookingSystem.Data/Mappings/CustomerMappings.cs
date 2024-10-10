@@ -6,14 +6,15 @@ namespace LibraryBookingSystem.Data.Mappings
 {
     public static class CustomerMappings
     {
-        public static CustomerDataDto ToCustomerDataDto(this Customer? customer)
+        public static CustomerDataDto? ToCustomerDataDto(this Customer? customer)
         {
             if (customer == null)
             {
-                return new CustomerDataDto();
+                return null;
             }
             return new CustomerDataDto
             {
+                CustomerId = customer.ID,
                 FirstName = customer.FirstName,
                 LastName = customer.LastName,
                 Address = customer.Address,
